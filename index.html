@@ -7,7 +7,7 @@
   <meta name="description" content="OddFlock is a B2B digital infrastructure agency. AI automation, scalable web development, UI/UX, and corporate growth — engineered as one system." />
 
   <!-- Favicon (uses your emblem) -->
-  <link rel="icon" type="image/jpeg" href="assets/logo.jpeg" />
+  <link rel="icon" type="image/png" href="assets/Oddflock.png" />
 
   <!-- Fonts: Space Grotesk (display), Inter (body), Space Mono (utility) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -27,7 +27,7 @@
     <div class="loader__lockup" data-loader-lockup>
       <span class="loader__mark" data-loader-mark>
         <!-- spinning logo image; inline SVG fallback if the asset is missing -->
-        <img src="assets/logo.jpeg" alt="" class="emblem-img"
+        <img src="assets/Oddflock.png" alt="" class="emblem-img"
              onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
         <svg class="emblem-svg" viewBox="0 0 100 100" style="display:none" aria-hidden="true">
           <circle cx="50" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="9"/>
@@ -44,7 +44,7 @@
   <header class="nav" data-nav>
     <a class="brand" href="#top" data-cursor="link" aria-label="OddFlock home">
       <span class="brand__mark">
-        <img src="assets/logo.jpeg" alt="OddFlock emblem" class="emblem-img"
+        <img src="assets/Oddflock.png" alt="OddFlock emblem" class="emblem-img"
              onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
         <svg class="emblem-svg" viewBox="0 0 100 100" style="display:none" aria-hidden="true">
           <circle cx="50" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="9"/>
@@ -87,6 +87,7 @@
   <!-- ============ HERO ============ -->
   <main id="top">
     <section class="hero" id="hero">
+      <div class="hero__glow" aria-hidden="true"></div>
       <canvas class="hero__field" data-field aria-hidden="true"></canvas>
 
       <div class="hero__inner">
@@ -111,12 +112,6 @@
           <a href="#infrastructure" class="btn btn--ghost" data-cursor="link">See the infrastructure</a>
         </div>
       </div>
-
-      <div class="hero__foot">
-        <span class="mono">EST. 2025</span>
-        <span class="mono hero__scroll" data-cursor="link">SCROLL <i>↓</i></span>
-        <span class="mono">23.78°N / 90.41°E</span>
-      </div>
     </section>
 
     <!-- ============ MARQUEE ============ -->
@@ -126,12 +121,14 @@
         <span>Web Development</span><span class="dot">✦</span>
         <span>UI / UX</span><span class="dot">✦</span>
         <span>Video Production</span><span class="dot">✦</span>
+        <span>Influencer Marketing</span><span class="dot">✦</span>
         <span>Corporate PR</span><span class="dot">✦</span>
         <span>Revenue Architecture</span><span class="dot">✦</span>
         <span>AI Automation</span><span class="dot">✦</span>
         <span>Web Development</span><span class="dot">✦</span>
         <span>UI / UX</span><span class="dot">✦</span>
         <span>Video Production</span><span class="dot">✦</span>
+        <span>Influencer Marketing</span><span class="dot">✦</span>
         <span>Corporate PR</span><span class="dot">✦</span>
         <span>Revenue Architecture</span><span class="dot">✦</span>
       </div>
@@ -234,8 +231,7 @@
       <svg class="flock__net" data-net aria-hidden="true"></svg>
 
       <div class="flock__grid" data-flock>
-        <!-- CEO — featured -->
-        <article class="member member--lead" data-member data-reveal data-cursor="view">
+        <article class="member member--ceo" data-member data-reveal data-cursor="view">
           <div class="member__media">
             <img src="assets/Tanjim__ceo_.png" alt="Tanjim Shaharear Fahim" loading="lazy"
                  onerror="this.parentElement.classList.add('is-missing');" />
@@ -263,6 +259,19 @@
 
         <article class="member" data-member data-reveal data-cursor="view">
           <div class="member__media">
+            <img src="assets/Mahir.png" alt="Mahir" loading="lazy"
+                 onerror="this.parentElement.classList.add('is-missing');" />
+            <span class="member__fallback" aria-hidden="true">MH</span>
+          </div>
+          <div class="member__meta">
+            <span class="member__role mono">Head of Engineering</span>
+            <h3 class="member__name">Mahir</h3>
+            <p class="member__bio">Front-end, back-end, WordPress. Codes the portals and infrastructure clients run on.</p>
+          </div>
+        </article>
+
+        <article class="member" data-member data-reveal data-cursor="view">
+          <div class="member__media">
             <img src="assets/Arafat.png" alt="Arafat" loading="lazy"
                  onerror="this.parentElement.classList.add('is-missing');" />
             <span class="member__fallback" aria-hidden="true">AR</span>
@@ -284,19 +293,6 @@
             <span class="member__role mono">Design · Interface</span>
             <h3 class="member__name">Ahnaf Akbar Sahib</h3>
             <p class="member__bio">Designs the foundational portal layouts and UI systems the developers build on.</p>
-          </div>
-        </article>
-
-        <article class="member" data-member data-reveal data-cursor="view">
-          <div class="member__media">
-            <img src="assets/Mahir.png" alt="Mahir" loading="lazy"
-                 onerror="this.parentElement.classList.add('is-missing');" />
-            <span class="member__fallback" aria-hidden="true">MH</span>
-          </div>
-          <div class="member__meta">
-            <span class="member__role mono">Head of Engineering</span>
-            <h3 class="member__name">Mahir</h3>
-            <p class="member__bio">Front-end, back-end, WordPress. Codes the portals and infrastructure clients run on.</p>
           </div>
         </article>
 
@@ -338,6 +334,32 @@
             <p class="member__bio">Builds the autonomous AI pipelines that generate content at scale from existing assets.</p>
           </div>
         </article>
+
+        <article class="member" data-member data-reveal data-cursor="view">
+          <div class="member__media">
+            <img src="assets/Ahbab.png" alt="Ahbab Rahman" loading="lazy"
+                 onerror="this.parentElement.classList.add('is-missing');" />
+            <span class="member__fallback" aria-hidden="true">AB</span>
+          </div>
+          <div class="member__meta">
+            <span class="member__role mono">Data &amp; Research</span>
+            <h3 class="member__name">Ahbab Rahman</h3>
+            <p class="member__bio">Head of Market Research — deep competitor analysis and financial modeling, managing the modelers and analysts.</p>
+          </div>
+        </article>
+
+        <article class="member" data-member data-reveal data-cursor="view">
+          <div class="member__media">
+            <img src="assets/Yead.png" alt="Yead Mehbub" loading="lazy"
+                 onerror="this.parentElement.classList.add('is-missing');" />
+            <span class="member__fallback" aria-hidden="true">YM</span>
+          </div>
+          <div class="member__meta">
+            <span class="member__role mono">Monetization &amp; Outreach</span>
+            <h3 class="member__name">Yead Mehbub</h3>
+            <p class="member__bio">Head of PR &amp; IMA — managing sponsor outreach coordinators and influencer talent managers.</p>
+          </div>
+        </article>
       </div>
     </section>
 
@@ -351,43 +373,69 @@
       </div>
 
       <div class="vault__list">
-        <article class="case case--live" data-reveal data-cursor="view">
-          <div class="case__top">
-            <span class="mono case__no">CASE 001</span>
+        <article class="case case--live" data-case data-reveal data-cursor="view">
+          <div class="case__media">
+            <img src="assets/Shoishob.jpg" alt="ShoiShob" loading="lazy"
+                 onerror="this.parentElement.classList.add('is-missing');" />
+            <span class="case__media-fallback" aria-hidden="true">ShoiShob</span>
             <span class="mono case__status case__status--live"><i></i>In production</span>
           </div>
-          <h3 class="case__name">ShoiShob</h3>
-          <p class="case__sector mono">Children's apparel · 5 retail outlets</p>
-          <p class="case__scope">
-            Full website infrastructure rebuild plus an AI-automated product
-            photography and video pipeline — replacing recurring studio costs with
-            a system the brand runs in-house.
-          </p>
-          <div class="case__tags">
-            <span class="chip mono">Web</span>
-            <span class="chip mono">AI Media</span>
-            <span class="chip mono">Retail</span>
+          <div class="case__body">
+            <span class="mono case__no">CASE 001</span>
+            <h3 class="case__name">ShoiShob</h3>
+            <p class="case__sector mono">Children's apparel · 5 retail outlets</p>
+            <button class="case__more" data-case-toggle aria-expanded="false" data-cursor="link">
+              <span class="case__more-label">Learn more</span>
+              <span class="case__more-icon" aria-hidden="true">+</span>
+            </button>
+            <div class="case__detail" data-case-detail>
+              <div class="case__detail-inner">
+                <p class="case__scope">
+                  Full website infrastructure rebuild plus an AI-automated product
+                  photography and video pipeline — replacing recurring studio costs
+                  with a system the brand runs in-house.
+                </p>
+                <div class="case__tags">
+                  <span class="chip mono">Web</span>
+                  <span class="chip mono">AI Media</span>
+                  <span class="chip mono">Retail</span>
+                </div>
+              </div>
+            </div>
           </div>
         </article>
 
-        <article class="case case--soon" data-reveal data-cursor="view">
-          <div class="case__top">
-            <span class="mono case__no">CASE 002</span>
+        <article class="case case--soon" data-case data-reveal data-cursor="view">
+          <div class="case__media">
+            <img src="assets/Boishakhi.jpeg" alt="Boishakhi TV" loading="lazy"
+                 onerror="this.parentElement.classList.add('is-missing');" />
+            <span class="case__media-fallback" aria-hidden="true">Boishakhi TV</span>
             <span class="mono case__status case__status--live"><i></i>In progress · Q3 2026</span>
           </div>
-          <h3 class="case__name">Boishakhi TV</h3>
-          <p class="case__sector mono">National broadcast · 83,000+ asset archive</p>
-          <p class="case__scope">
-            A full digital ecosystem for a legacy national network sitting on a
-            dormant archive of 83,000+ broadcasts: FAST streaming channels to
-            monetize dead inventory, AI-dubbed international news for the global
-            diaspora, and a high-velocity content engine to reclaim lost digital
-            ground.
-          </p>
-          <div class="case__tags">
-            <span class="chip mono">Strategy</span>
-            <span class="chip mono">AI Automation</span>
-            <span class="chip mono">Streaming</span>
+          <div class="case__body">
+            <span class="mono case__no">CASE 002</span>
+            <h3 class="case__name">Boishakhi TV</h3>
+            <p class="case__sector mono">National broadcast · 83,000+ asset archive</p>
+            <button class="case__more" data-case-toggle aria-expanded="false" data-cursor="link">
+              <span class="case__more-label">Learn more</span>
+              <span class="case__more-icon" aria-hidden="true">+</span>
+            </button>
+            <div class="case__detail" data-case-detail>
+              <div class="case__detail-inner">
+                <p class="case__scope">
+                  A full digital ecosystem for a legacy national network sitting on a
+                  dormant archive of 83,000+ broadcasts: FAST streaming channels to
+                  monetize dead inventory, AI-dubbed international news for the global
+                  diaspora, and a high-velocity content engine to reclaim lost digital
+                  ground.
+                </p>
+                <div class="case__tags">
+                  <span class="chip mono">Strategy</span>
+                  <span class="chip mono">AI Automation</span>
+                  <span class="chip mono">Streaming</span>
+                </div>
+              </div>
+            </div>
           </div>
         </article>
       </div>
@@ -403,9 +451,9 @@
       <p class="contact__sub reveal" data-reveal data-reveal-delay="160">
         Send the problem. We'll send back a diagnostic, not a pitch.
       </p>
-      <!-- TODO: replace with your real email + Instagram -->
-      <a class="contact__mail" href="mailto:hello@oddflock.agency" data-cursor="link" data-reveal data-reveal-delay="220">
-        hello@oddflock.agency
+      <!-- TODO: replace social links with your real profiles -->
+      <a class="contact__mail" href="mailto:oddflock1626@gmail.com" data-cursor="link" data-reveal data-reveal-delay="220">
+        oddflock1626@gmail.com
       </a>
       <div class="contact__socials reveal" data-reveal data-reveal-delay="300">
         <a href="#" data-cursor="link">Instagram ↗</a>
@@ -419,7 +467,7 @@
     <div class="footer__top">
       <a class="brand" href="#top" data-cursor="link" aria-label="OddFlock home">
         <span class="brand__mark">
-          <img src="assets/logo.jpeg" alt="OddFlock emblem" class="emblem-img"
+          <img src="assets/Oddflock.png" alt="OddFlock emblem" class="emblem-img"
                onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
           <svg class="emblem-svg" viewBox="0 0 100 100" style="display:none" aria-hidden="true">
             <circle cx="50" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="9"/>
