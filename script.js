@@ -6,6 +6,7 @@
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const finePointer  = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 
   /* ------------------------------------------------------------------
      1. CUSTOM CURSOR — inner dot tracks instantly, outer ring lags
@@ -52,33 +53,94 @@
   }
 
   /* ------------------------------------------------------------------
-     2. LOADER — fill the bar, then reveal the hero headline
+     2. INTRO LOADER — emblem spins center, wordmark types, the whole
+        lockup flies to the nav position, then the page reveals
      ------------------------------------------------------------------ */
-  const loader = document.querySelector("[data-loader]");
-  const fill   = document.querySelector("[data-loader-fill]");
+  const loader    = document.querySelector("[data-loader]");
   const heroTitle = document.querySelector(".hero__title");
 
-  let p = 0;
-  const tick = setInterval(() => {
-    p = Math.min(100, p + Math.random() * 18 + 6);
-    if (fill) fill.style.width = p + "%";
-    if (p >= 100) {
-      clearInterval(tick);
-      setTimeout(() => {
-        if (loader) loader.classList.add("is-done");
-        if (heroTitle) heroTitle.classList.add("is-revealed"); // triggers word-rise
-      }, 320);
-    }
-  }, reduceMotion ? 60 : 140);
+  function revealPage() {
+    if (loader) loader.classList.add("is-done");
+    if (heroTitle) heroTitle.classList.add("is-revealed"); // word-rise
+    document.body.style.overflow = "";
+  }
 
-  // safety: never let the loader trap the page
+  (function intro() {
+    const lockup   = document.querySelector("[data-loader-lockup]");
+    const mark     = document.querySelector("[data-loader-mark]");
+    const word     = document.querySelector("[data-loader-word]");
+    const navBrand = document.querySelector(".nav .brand");
+
+    // missing pieces or reduced-motion → skip straight to the page
+    if (!loader || !lockup || !mark || !word || !navBrand || reduceMotion) {
+      setTimeout(revealPage, reduceMotion ? 120 : 0);
+      return;
+    }
+
+    document.body.style.overflow = "hidden"; // keep the nav position stable
+
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const START      = vw < 600 ? 58 : 80;  // starting emblem size
+    const END_MARK   = 30;                   // nav emblem size
+    const START_WORD = vw < 600 ? 22 : 30;
+    const END_WORD   = 18;                    // ≈ nav wordmark (1.12rem)
+    const GAP        = 14;
+
+    // measure wordmark width at both sizes so nothing clips
+    word.style.width = "auto"; word.style.opacity = "0";
+    word.style.fontSize = START_WORD + "px"; const wStart = word.offsetWidth;
+    word.style.fontSize = END_WORD + "px";   const wEnd   = word.offsetWidth;
+
+    // initial state — emblem centered, word collapsed
+    lockup.style.transition = "none";
+    mark.style.width = mark.style.height = START + "px";
+    word.style.width = "0"; word.style.opacity = "0";
+    word.style.fontSize = START_WORD + "px"; word.style.marginLeft = "0";
+    lockup.style.left = (vw / 2 - START / 2) + "px";
+    lockup.style.top  = (vh / 2 - START / 2) + "px";
+    lockup.getBoundingClientRect(); // reflow
+
+    // PHASE 1 — spin the logo image
+    mark.style.animation = "spin 1.05s cubic-bezier(0.4,0,0.2,1) 1";
+
+    setTimeout(() => {
+      // PHASE 2 — stop, slide left so the finished lockup ends up centered
+      mark.style.animation = "none";
+      lockup.style.transition = "left .55s " + EASE + ", top .55s " + EASE;
+      lockup.style.left = (vw / 2 - START / 2 - (wStart + GAP) / 2) + "px";
+
+      setTimeout(() => {
+        // PHASE 3 — type the wordmark in (width reveal + fade)
+        word.style.transition = "width .5s " + EASE + ", opacity .35s ease, margin-left .45s " + EASE;
+        word.style.width = wStart + "px";
+        word.style.opacity = "1";
+        word.style.marginLeft = GAP + "px";
+
+        setTimeout(() => {
+          // PHASE 4 — fly to the top-left nav slot, shrinking to nav size
+          const r = navBrand.getBoundingClientRect();
+          lockup.style.transition = "left .8s " + EASE + ", top .8s " + EASE;
+          mark.style.transition   = "width .8s " + EASE + ", height .8s " + EASE;
+          word.style.transition   = "font-size .8s " + EASE + ", width .8s " + EASE + ", margin-left .8s " + EASE;
+          lockup.style.left = r.left + "px";
+          lockup.style.top  = r.top + "px";
+          mark.style.width = mark.style.height = END_MARK + "px";
+          word.style.fontSize = END_WORD + "px";
+          word.style.width = wEnd + "px";
+          word.style.marginLeft = "12px";
+
+          // PHASE 5 — hand off to the real (identical) nav, fade the loader
+          setTimeout(revealPage, 720);
+        }, 720);
+      }, 320);
+    }, 1050);
+  })();
+
+  // safety net — never trap the page if something stalls
   window.addEventListener("load", () => {
     setTimeout(() => {
-      if (loader && !loader.classList.contains("is-done")) {
-        loader.classList.add("is-done");
-        if (heroTitle) heroTitle.classList.add("is-revealed");
-      }
-    }, 2600);
+      if (loader && !loader.classList.contains("is-done")) revealPage();
+    }, 5200);
   });
 
   /* ------------------------------------------------------------------
@@ -222,13 +284,7 @@
 
     function resize() {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
-      
-      // Force clean mathematical extraction of structural boundaries instead of virtual viewports
-      const parentFrame = canvas.parentElement ? canvas.parentElement.getBoundingClientRect() : { width: window.innerWidth, height: window.innerHeight };
-      
-      w = parentFrame.width; 
-      h = parentFrame.height;
-      
+      w = canvas.clientWidth; h = canvas.clientHeight;
       canvas.width = w * dpr; canvas.height = h * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
