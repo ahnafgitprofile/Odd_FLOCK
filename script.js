@@ -65,7 +65,7 @@
     document.body.style.overflow = "";
   }
 
-  (function intro() {
+  function runIntro() {
     const lockup   = document.querySelector("[data-loader-lockup]");
     const mark     = document.querySelector("[data-loader-mark]");
     const word     = document.querySelector("[data-loader-word]");
@@ -86,10 +86,11 @@
     const END_WORD   = 18;                    // ≈ nav wordmark (1.12rem)
     const GAP        = 14;
 
-    // measure wordmark width at both sizes so nothing clips
+    // measure wordmark width at both sizes so nothing clips (fonts are ready here)
+    word.style.color = "var(--ghost)"; // starts white
     word.style.width = "auto"; word.style.opacity = "0";
-    word.style.fontSize = START_WORD + "px"; const wStart = word.offsetWidth;
-    word.style.fontSize = END_WORD + "px";   const wEnd   = word.offsetWidth;
+    word.style.fontSize = START_WORD + "px"; const wStart = word.offsetWidth || START_WORD * 6;
+    word.style.fontSize = END_WORD + "px";   const wEnd   = word.offsetWidth || END_WORD * 6;
 
     // initial state — emblem centered, word collapsed
     lockup.style.transition = "none";
@@ -110,37 +111,48 @@
       lockup.style.left = (vw / 2 - START / 2 - (wStart + GAP) / 2) + "px";
 
       setTimeout(() => {
-        // PHASE 3 — type the wordmark in (width reveal + fade)
+        // PHASE 3 — type the wordmark in (white)
         word.style.transition = "width .5s " + EASE + ", opacity .35s ease, margin-left .45s " + EASE;
         word.style.width = wStart + "px";
         word.style.opacity = "1";
         word.style.marginLeft = GAP + "px";
 
         setTimeout(() => {
-          // PHASE 4 — fly to the top-left nav slot, shrinking to nav size
+          // PHASE 4 — fly to the nav slot, shrink to nav size, fade white → green
           const r = navBrand.getBoundingClientRect();
           lockup.style.transition = "left .8s " + EASE + ", top .8s " + EASE;
           mark.style.transition   = "width .8s " + EASE + ", height .8s " + EASE;
-          word.style.transition   = "font-size .8s " + EASE + ", width .8s " + EASE + ", margin-left .8s " + EASE;
+          word.style.transition   = "font-size .8s " + EASE + ", width .8s " + EASE + ", margin-left .8s " + EASE + ", color .7s ease";
           lockup.style.left = r.left + "px";
           lockup.style.top  = r.top + "px";
           mark.style.width = mark.style.height = END_MARK + "px";
           word.style.fontSize = END_WORD + "px";
           word.style.width = wEnd + "px";
           word.style.marginLeft = "12px";
+          word.style.color = "var(--emerald)"; // settles to logo green, matching the nav
 
           // PHASE 5 — hand off to the real (identical) nav, fade the loader
           setTimeout(revealPage, 720);
         }, 720);
       }, 320);
     }, 1050);
-  })();
+  }
+
+  // wait for the web font before measuring, so the wordmark never clips on mobile
+  let introStarted = false;
+  const startIntro = () => { if (!introStarted) { introStarted = true; runIntro(); } };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(startIntro);
+    setTimeout(startIntro, 900); // fallback if fonts.ready stalls
+  } else {
+    startIntro();
+  }
 
   // safety net — never trap the page if something stalls
   window.addEventListener("load", () => {
     setTimeout(() => {
       if (loader && !loader.classList.contains("is-done")) revealPage();
-    }, 5200);
+    }, 5600);
   });
 
   /* ------------------------------------------------------------------
@@ -273,14 +285,30 @@
   });
 
   /* ------------------------------------------------------------------
+     5d. THE VAULT — "Learn more" slides the case detail open
+     ------------------------------------------------------------------ */
+  document.querySelectorAll("[data-case-toggle]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const card = btn.closest("[data-case]");
+      if (!card) return;
+      const open = card.classList.toggle("is-open");
+      btn.setAttribute("aria-expanded", String(open));
+      const label = btn.querySelector(".case__more-label");
+      if (label) label.textContent = open ? "Show less" : "Learn more";
+    });
+  });
+
+  /* ------------------------------------------------------------------
      6. HERO AMBIENT FIELD — flocking nodes + connector lines (canvas)
      ------------------------------------------------------------------ */
   const canvas = document.querySelector("[data-field]");
   if (canvas && !reduceMotion) {
     const ctx = canvas.getContext("2d");
     let w, h, dpr, nodes, raf;
-    const COUNT = window.innerWidth < 700 ? 22 : 40;
-    const LINK = 150;
+    const COUNT = window.innerWidth < 700 ? 26 : 54;
+    const LINK = 168;
+    const MOUSE_R = 200;
+    let mx = -9999, my = -9999; // pointer in canvas coords
 
     function resize() {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -292,58 +320,79 @@
     function seed() {
       nodes = Array.from({ length: COUNT }, () => ({
         x: Math.random() * w, y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.32, vy: (Math.random() - 0.5) * 0.32,
-        bird: Math.random() < 0.28           // a fraction render as little "birds"
+        vx: (Math.random() - 0.5) * 0.30, vy: (Math.random() - 0.5) * 0.30,
+        ph: Math.random() * Math.PI * 2,        // twinkle phase
+        bird: Math.random() < 0.26
       }));
     }
 
-    function draw() {
+    canvas.addEventListener("mousemove", (e) => {
+      const r = canvas.getBoundingClientRect();
+      mx = e.clientX - r.left; my = e.clientY - r.top;
+    });
+    canvas.addEventListener("mouseleave", () => { mx = my = -9999; });
+
+    function draw(t) {
       ctx.clearRect(0, 0, w, h);
 
-      // links
+      // node-to-node links
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const a = nodes[i], b = nodes[j];
           const dx = a.x - b.x, dy = a.y - b.y;
           const d = Math.hypot(dx, dy);
           if (d < LINK) {
-            ctx.strokeStyle = `rgba(52,168,102,${(1 - d / LINK) * 0.16})`;
+            ctx.strokeStyle = "rgba(52,168,102," + ((1 - d / LINK) * 0.16) + ")";
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
           }
         }
       }
 
-      // nodes
       nodes.forEach((n) => {
+        // gentle pull toward the cursor when near, then drift
+        const ddx = mx - n.x, ddy = my - n.y;
+        const dm = Math.hypot(ddx, ddy);
+        if (dm < MOUSE_R) {
+          n.vx += (ddx / dm) * 0.012;
+          n.vy += (ddy / dm) * 0.012;
+          // bright link to the cursor
+          ctx.strokeStyle = "rgba(76,208,136," + ((1 - dm / MOUSE_R) * 0.5) + ")";
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(mx, my); ctx.stroke();
+        }
+        // damping + speed cap so it stays calm
+        n.vx *= 0.99; n.vy *= 0.99;
+        const sp = Math.hypot(n.vx, n.vy);
+        if (sp > 0.6) { n.vx = (n.vx / sp) * 0.6; n.vy = (n.vy / sp) * 0.6; }
+
         n.x += n.vx; n.y += n.vy;
         if (n.x < 0 || n.x > w) n.vx *= -1;
         if (n.y < 0 || n.y > h) n.vy *= -1;
 
         if (n.bird) {
-          // tiny chevron / bird
           const ang = Math.atan2(n.vy, n.vx);
           ctx.save();
           ctx.translate(n.x, n.y); ctx.rotate(ang);
-          ctx.strokeStyle = "rgba(76,208,136,0.55)"; ctx.lineWidth = 1.2;
-          ctx.beginPath();
-          ctx.moveTo(-4, -3); ctx.lineTo(0, 0); ctx.lineTo(-4, 3);
-          ctx.stroke(); ctx.restore();
+          ctx.strokeStyle = "rgba(76,208,136,0.6)"; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.moveTo(-4, -3); ctx.lineTo(0, 0); ctx.lineTo(-4, 3); ctx.stroke();
+          ctx.restore();
         } else {
-          ctx.fillStyle = "rgba(52,168,102,0.5)";
-          ctx.beginPath(); ctx.arc(n.x, n.y, 1.4, 0, Math.PI * 2); ctx.fill();
+          const tw = 0.4 + 0.35 * Math.sin(t * 0.001 + n.ph); // subtle twinkle
+          ctx.fillStyle = "rgba(52,168,102," + tw + ")";
+          ctx.beginPath(); ctx.arc(n.x, n.y, 1.5, 0, Math.PI * 2); ctx.fill();
         }
       });
 
       raf = requestAnimationFrame(draw);
     }
 
-    function start() { cancelAnimationFrame(raf); resize(); seed(); draw(); }
+    function start() { cancelAnimationFrame(raf); resize(); seed(); raf = requestAnimationFrame(draw); }
     start();
     window.addEventListener("resize", () => { resize(); seed(); }, { passive: true });
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) cancelAnimationFrame(raf);
-      else draw();
+      else raf = requestAnimationFrame(draw);
     });
   }
 
