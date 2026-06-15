@@ -515,27 +515,27 @@ body.cursor-active a, body.cursor-active button, body.cursor-active [data-cursor
 
 /* =====================================================================
    UNIVERSAL VIEWPORT COMPRESSION DEFIANCE ENGINE
-   Fixes massive dark empty space on simulated wide responsive ratios
+   Overwrites hardcoded JavaScript positions and canvas bloating on Desktop-on-Mobile Spoof modes
    ===================================================================== */
 .hero {
-  position: relative;
-  min-height: 100vh;
-  min-height: 100svh;
+  position: relative !important;
+  min-height: 100vh !important;
+  min-height: 100svh !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: space-between !important;
   padding-bottom: 0 !important;
-  overflow: hidden;
+  overflow: hidden !important;
 }
 
 .hero__inner {
-  position: relative;
-  z-index: 2;
-  width: 100%;
+  position: relative !important;
+  z-index: 2 !important;
+  width: 100% !important;
   margin-top: auto !important;
   margin-bottom: auto !important;
-  padding-top: 40px;
-  padding-bottom: 40px;
+  padding-top: 40px !important;
+  padding-bottom: 40px !important;
 }
 
 .hero__field {
@@ -546,14 +546,13 @@ body.cursor-active a, body.cursor-active button, body.cursor-active [data-cursor
   height: 100% !important;
   max-height: 100vh !important;
   max-height: 100svh !important;
-  object-fit: cover !important;
-  pointer-events: none;
+  pointer-events: none !important;
 }
 
 .hero__foot {
-  position: relative;
-  z-index: 2;
-  width: 100%;
+  position: relative !important;
+  z-index: 2 !important;
+  width: 100% !important;
   margin-top: auto !important;
   padding: 20px 0 !important;
 }
