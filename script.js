@@ -222,7 +222,13 @@
 
     function resize() {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = canvas.clientWidth; h = canvas.clientHeight;
+      
+      // Force clean mathematical extraction of structural boundaries instead of virtual viewports
+      const parentFrame = canvas.parentElement ? canvas.parentElement.getBoundingClientRect() : { width: window.innerWidth, height: window.innerHeight };
+      
+      w = parentFrame.width; 
+      h = parentFrame.height;
+      
       canvas.width = w * dpr; canvas.height = h * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
