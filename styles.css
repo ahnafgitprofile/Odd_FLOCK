@@ -513,38 +513,26 @@ body.cursor-active a, body.cursor-active button, body.cursor-active [data-cursor
 
 
 
-/* ---------- Mobile Spacing & Height Correction ---------- */
-@media (max-width: 560px) {
-  
-  /* 1. Prevent the hero from stretching into a massive empty block */
-  .hero {
-    min-height: calc(100svh - 58px); /* Account for mobile nav bar safely */
-    justify-content: flex-start;     /* Align content towards top instead of forcing a deep center push */
-    padding: 100px var(--pad-x) 20px; /* Bring padding down tightly */
-  }
+/* ---------- Universal Hero Spacing & Desktop-on-Mobile Fix ---------- */
+.hero {
+  /* Use svh (small viewport height) to safely protect against mobile browser address bars */
+  min-height: calc(100svh - 60px); 
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  /* Allows content to dynamically space itself rather than being pushed by fixed paddings */
+  justify-content: space-between; 
+  padding-bottom: 20px !important;
+}
 
-  /* 2. Tighten text metrics to stop vertical stacking bloat */
-  .hero__title {
-    margin: 14px 0 0;
-    line-height: 1.05;
-  }
+/* Forces the bottom metadata row to always stay right above the marquee */
+.hero__foot {
+  margin-top: auto !important;
+  padding-top: 40px; 
+}
 
-  .hero__sub {
-    margin-top: 16px;
-    font-size: 0.95rem;
-    max-width: 100%; /* Let text flow naturally across smaller viewport bounds */
-  }
-
-  /* 3. Pull buttons closer to text block */
-  .hero__cta {
-    margin-top: 24px;
-    gap: 10px;
-  }
-
-  /* 4. Ensure foot data pins cleanly without adding massive structural height */
-  .hero__foot {
-    margin-top: auto; /* Push down cleanly right above the marquee */
-    padding: 20px 0 10px;
-    font-size: 0.7rem;
-  }
+/* Adjusts the title layout engine so it doesn't expand vertically in desktop simulation modes */
+.hero__title {
+  align-self: flex-start;
+  width: 100%;
 }
