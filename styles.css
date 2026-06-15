@@ -510,3 +510,41 @@ body.cursor-active a, body.cursor-active button, body.cursor-active [data-cursor
   .cursor-dot, .cursor-ring{ display:none; }
   body.cursor-active{ cursor:auto; }
 }
+
+
+
+/* ---------- Mobile Spacing & Height Correction ---------- */
+@media (max-width: 560px) {
+  
+  /* 1. Prevent the hero from stretching into a massive empty block */
+  .hero {
+    min-height: calc(100svh - 58px); /* Account for mobile nav bar safely */
+    justify-content: flex-start;     /* Align content towards top instead of forcing a deep center push */
+    padding: 100px var(--pad-x) 20px; /* Bring padding down tightly */
+  }
+
+  /* 2. Tighten text metrics to stop vertical stacking bloat */
+  .hero__title {
+    margin: 14px 0 0;
+    line-height: 1.05;
+  }
+
+  .hero__sub {
+    margin-top: 16px;
+    font-size: 0.95rem;
+    max-width: 100%; /* Let text flow naturally across smaller viewport bounds */
+  }
+
+  /* 3. Pull buttons closer to text block */
+  .hero__cta {
+    margin-top: 24px;
+    gap: 10px;
+  }
+
+  /* 4. Ensure foot data pins cleanly without adding massive structural height */
+  .hero__foot {
+    margin-top: auto; /* Push down cleanly right above the marquee */
+    padding: 20px 0 10px;
+    font-size: 0.7rem;
+  }
+}
