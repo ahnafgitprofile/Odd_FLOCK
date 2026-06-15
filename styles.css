@@ -513,26 +513,47 @@ body.cursor-active a, body.cursor-active button, body.cursor-active [data-cursor
 
 
 
-/* ---------- Universal Hero Spacing & Desktop-on-Mobile Fix ---------- */
+/* =====================================================================
+   UNIVERSAL VIEWPORT COMPRESSION DEFIANCE ENGINE
+   Fixes massive dark empty space on simulated wide responsive ratios
+   ===================================================================== */
 .hero {
-  /* Use svh (small viewport height) to safely protect against mobile browser address bars */
-  min-height: calc(100svh - 60px); 
-  height: auto;
-  display: flex;
-  flex-direction: column;
-  /* Allows content to dynamically space itself rather than being pushed by fixed paddings */
-  justify-content: space-between; 
-  padding-bottom: 20px !important;
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  padding-bottom: 0 !important;
+  overflow: hidden;
 }
 
-/* Forces the bottom metadata row to always stay right above the marquee */
-.hero__foot {
-  margin-top: auto !important;
-  padding-top: 40px; 
-}
-
-/* Adjusts the title layout engine so it doesn't expand vertically in desktop simulation modes */
-.hero__title {
-  align-self: flex-start;
+.hero__inner {
+  position: relative;
+  z-index: 2;
   width: 100%;
+  margin-top: auto !important;
+  margin-bottom: auto !important;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.hero__field {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100vh !important;
+  max-height: 100svh !important;
+  object-fit: cover !important;
+  pointer-events: none;
+}
+
+.hero__foot {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  margin-top: auto !important;
+  padding: 20px 0 !important;
 }
