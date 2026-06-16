@@ -18,6 +18,11 @@
 </head>
 <body>
 
+  <!-- ============ GLOBAL ANIMATED BACKGROUND (cursor-reactive node field) ============ -->
+  <canvas class="bg-field" data-bg-field aria-hidden="true"></canvas>
+  <!-- scroll progress -->
+  <div class="scrollbar" data-scrollbar aria-hidden="true"></div>
+
   <!-- ============ CUSTOM CURSOR (inner dot + trailing ring) ============ -->
   <div class="cursor-ring" data-cursor-ring aria-hidden="true"></div>
   <div class="cursor-dot" data-cursor-dot aria-hidden="true"></div>
@@ -88,7 +93,6 @@
   <main id="top">
     <section class="hero" id="hero">
       <div class="hero__glow" aria-hidden="true"></div>
-      <canvas class="hero__field" data-field aria-hidden="true"></canvas>
 
       <div class="hero__inner">
         <p class="eyebrow reveal" data-reveal>
