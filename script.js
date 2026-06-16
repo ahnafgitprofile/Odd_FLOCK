@@ -9,24 +9,41 @@
   const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 
   /* ------------------------------------------------------------------
-     1. CUSTOM CURSOR — inner dot tracks instantly, outer ring lags
+     TOUCH RIPPLE — fires on touchstart for coarse / touch pointers.
+     This covers mobile browsers AND Chrome's "desktop mode" on mobile,
+     because both report pointer:coarse / hover:none so finePointer=false.
+     ------------------------------------------------------------------ */
+  if (!finePointer && !reduceMotion) {
+    document.addEventListener("touchstart", (e) => {
+      Array.from(e.changedTouches).forEach((t) => {
+        const el = document.createElement("div");
+        el.className = "touch-ripple";
+        el.style.left = t.clientX + "px";
+        el.style.top  = t.clientY + "px";
+        document.body.appendChild(el);
+        el.addEventListener("animationend", () => el.remove(), { once: true });
+      });
+    }, { passive: true });
+  }
+
+  /* ------------------------------------------------------------------
+     1. CUSTOM CURSOR — inner dot tracks instantly, outer ring lags.
+        Only active on true fine-pointer (mouse) devices.
      ------------------------------------------------------------------ */
   if (finePointer && !reduceMotion) {
     const dot  = document.querySelector("[data-cursor-dot]");
     const ring = document.querySelector("[data-cursor-ring]");
     document.body.classList.add("cursor-active");
 
-    let mx = window.innerWidth / 2, my = window.innerHeight / 2; // target (mouse)
-    let rx = mx, ry = my;                                        // ring (eased)
+    let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+    let rx = mx, ry = my;
 
     window.addEventListener("mousemove", (e) => {
       mx = e.clientX; my = e.clientY;
-      // inner dot is instant
       dot.style.transform = `translate(${mx}px, ${my}px) translate(-50%, -50%)`;
     }, { passive: true });
 
     function loop() {
-      // outer ring eases toward the mouse (the "slow" second layer)
       rx += (mx - rx) * 0.14;
       ry += (my - ry) * 0.14;
       ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
@@ -34,7 +51,6 @@
     }
     loop();
 
-    // hover intent — grows the ring, tags "view" targets differently
     document.querySelectorAll("[data-cursor]").forEach((el) => {
       const type = el.getAttribute("data-cursor");
       el.addEventListener("mouseenter", () => {
@@ -47,7 +63,6 @@
       });
     });
 
-    // hide when leaving the window
     document.addEventListener("mouseleave", () => { dot.style.opacity = ring.style.opacity = "0"; });
     document.addEventListener("mouseenter", () => { dot.style.opacity = ring.style.opacity = "1"; });
   }
@@ -61,7 +76,7 @@
 
   function revealPage() {
     if (loader) loader.classList.add("is-done");
-    if (heroTitle) heroTitle.classList.add("is-revealed"); // word-rise
+    if (heroTitle) heroTitle.classList.add("is-revealed");
     document.body.style.overflow = "";
   }
 
@@ -71,54 +86,49 @@
     const word     = document.querySelector("[data-loader-word]");
     const navBrand = document.querySelector(".nav .brand");
 
-    // missing pieces or reduced-motion → skip straight to the page
     if (!loader || !lockup || !mark || !word || !navBrand || reduceMotion) {
       setTimeout(revealPage, reduceMotion ? 120 : 0);
       return;
     }
 
-    document.body.style.overflow = "hidden"; // keep the nav position stable
+    document.body.style.overflow = "hidden";
 
     const vw = window.innerWidth, vh = window.innerHeight;
-    const START      = vw < 600 ? 58 : 80;  // starting emblem size
-    const END_MARK   = 30;                   // nav emblem size
+    const START      = vw < 600 ? 58 : 80;
+    const END_MARK   = 30;
     const START_WORD = vw < 600 ? 22 : 30;
-    const END_WORD   = 18;                    // ≈ nav wordmark (1.12rem)
+    const END_WORD   = 18;
     const GAP        = 14;
 
-    // measure wordmark width at both sizes so nothing clips (fonts are ready here)
-    word.style.color = "var(--ghost)"; // starts white
-    word.style.width = "auto"; word.style.opacity = "0";
-    word.style.fontSize = START_WORD + "px"; const wStart = word.offsetWidth || START_WORD * 6;
-    word.style.fontSize = END_WORD + "px";   const wEnd   = word.offsetWidth || END_WORD * 6;
-
-    // initial state — emblem centered, word collapsed
     lockup.style.transition = "none";
     mark.style.width = mark.style.height = START + "px";
+    word.style.color = "var(--ghost)";
     word.style.width = "0"; word.style.opacity = "0";
     word.style.fontSize = START_WORD + "px"; word.style.marginLeft = "0";
     lockup.style.left = (vw / 2 - START / 2) + "px";
     lockup.style.top  = (vh / 2 - START / 2) + "px";
-    lockup.getBoundingClientRect(); // reflow
+    lockup.getBoundingClientRect();
 
-    // PHASE 1 — spin the logo image
     mark.style.animation = "spin 1.05s cubic-bezier(0.4,0,0.2,1) 1";
 
     setTimeout(() => {
-      // PHASE 2 — stop, slide left so the finished lockup ends up centered
+      word.style.transition = "none"; word.style.width = "auto";
+      word.style.fontSize = START_WORD + "px"; const wStart = word.offsetWidth || START_WORD * 6;
+      word.style.fontSize = END_WORD + "px";   const wEnd   = word.offsetWidth || END_WORD * 6;
+      word.style.fontSize = START_WORD + "px"; word.style.width = "0";
+      word.getBoundingClientRect();
+
       mark.style.animation = "none";
       lockup.style.transition = "left .55s " + EASE + ", top .55s " + EASE;
       lockup.style.left = (vw / 2 - START / 2 - (wStart + GAP) / 2) + "px";
 
       setTimeout(() => {
-        // PHASE 3 — type the wordmark in (white)
         word.style.transition = "width .5s " + EASE + ", opacity .35s ease, margin-left .45s " + EASE;
         word.style.width = wStart + "px";
         word.style.opacity = "1";
         word.style.marginLeft = GAP + "px";
 
         setTimeout(() => {
-          // PHASE 4 — fly to the nav slot, shrink to nav size, fade white → green
           const r = navBrand.getBoundingClientRect();
           lockup.style.transition = "left .8s " + EASE + ", top .8s " + EASE;
           mark.style.transition   = "width .8s " + EASE + ", height .8s " + EASE;
@@ -129,26 +139,16 @@
           word.style.fontSize = END_WORD + "px";
           word.style.width = wEnd + "px";
           word.style.marginLeft = "12px";
-          word.style.color = "var(--emerald)"; // settles to logo green, matching the nav
+          word.style.color = "var(--emerald)";
 
-          // PHASE 5 — hand off to the real (identical) nav, fade the loader
           setTimeout(revealPage, 720);
         }, 720);
       }, 320);
     }, 1050);
   }
 
-  // wait for the web font before measuring, so the wordmark never clips on mobile
-  let introStarted = false;
-  const startIntro = () => { if (!introStarted) { introStarted = true; runIntro(); } };
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(startIntro);
-    setTimeout(startIntro, 900); // fallback if fonts.ready stalls
-  } else {
-    startIntro();
-  }
+  runIntro();
 
-  // safety net — never trap the page if something stalls
   window.addEventListener("load", () => {
     setTimeout(() => {
       if (loader && !loader.classList.contains("is-done")) revealPage();
@@ -182,7 +182,6 @@
         const delay = parseInt(el.getAttribute("data-reveal-delay") || "0", 10);
         setTimeout(() => {
           el.classList.add("is-visible");
-          // any sub-headline with word-rise inside
           if (el.querySelector && el.querySelector(".word")) el.classList.add("is-revealed");
         }, delay);
         io.unobserve(el);
@@ -193,7 +192,6 @@
     revealEls.forEach((el) => el.classList.add("is-visible", "is-revealed"));
   }
 
-  // reveal word-rise on section headings (contact / others) when they enter
   document.querySelectorAll(".contact__title").forEach((el) => {
     if ("IntersectionObserver" in window) {
       const io2 = new IntersectionObserver((es) => {
@@ -204,7 +202,8 @@
   });
 
   /* ------------------------------------------------------------------
-     5. THE FLOCK — draw emerald connector lines between members on hover
+     5. THE FLOCK — draw emerald connector lines between members on hover.
+        Uses measured card centres relative to the SVG overlay.
      ------------------------------------------------------------------ */
   const net  = document.querySelector("[data-net]");
   const grid = document.querySelector("[data-flock]");
@@ -237,7 +236,6 @@
         });
         svg += `<circle cx="${from.x}" cy="${from.y}" r="4.5" />`;
         net.innerHTML = svg;
-        // force reflow then fade in
         requestAnimationFrame(() => {
           net.querySelectorAll("line, circle").forEach((node) => (node.style.opacity = "0.85"));
         });
@@ -266,7 +264,6 @@
     burger.addEventListener("click", () => setMenu(!menu.classList.contains("is-open")));
     menu.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => setMenu(false)));
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") setMenu(false); });
-    // if resized up to desktop while open, reset
     window.addEventListener("resize", () => {
       if (window.innerWidth > 960 && menu.classList.contains("is-open")) setMenu(false);
     }, { passive: true });
@@ -301,70 +298,77 @@
   /* ------------------------------------------------------------------
      6. HERO AMBIENT FIELD — flocking nodes + connector lines (canvas)
      ------------------------------------------------------------------ */
-  const canvas = document.querySelector("[data-field]");
+  const canvas = document.querySelector("[data-bg-field]");
   if (canvas && !reduceMotion) {
     const ctx = canvas.getContext("2d");
     let w, h, dpr, nodes, raf;
-    const COUNT = window.innerWidth < 700 ? 26 : 54;
-    const LINK = 168;
-    const MOUSE_R = 200;
-    let mx = -9999, my = -9999; // pointer in canvas coords
+    const COUNT = window.innerWidth < 700 ? 38 : 84;
+    const LINK = 150;
+    const MOUSE_R = 240;
+    let mx = -9999, my = -9999;
 
     function resize() {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = canvas.clientWidth; h = canvas.clientHeight;
+      w = window.innerWidth; h = window.innerHeight;
       canvas.width = w * dpr; canvas.height = h * dpr;
+      canvas.style.width = w + "px"; canvas.style.height = h + "px";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
     function seed() {
       nodes = Array.from({ length: COUNT }, () => ({
         x: Math.random() * w, y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.30, vy: (Math.random() - 0.5) * 0.30,
-        ph: Math.random() * Math.PI * 2,        // twinkle phase
-        bird: Math.random() < 0.26
+        vx: (Math.random() - 0.5) * 0.28, vy: (Math.random() - 0.5) * 0.28,
+        ph: Math.random() * Math.PI * 2,
+        bird: Math.random() < 0.24
       }));
     }
 
-    canvas.addEventListener("mousemove", (e) => {
-      const r = canvas.getBoundingClientRect();
-      mx = e.clientX - r.left; my = e.clientY - r.top;
-    });
-    canvas.addEventListener("mouseleave", () => { mx = my = -9999; });
+    /* Mouse tracking — desktop only (fine pointer).
+       On touch we skip mouse tracking so the canvas stays purely ambient. */
+    if (finePointer) {
+      window.addEventListener("mousemove", (e) => { mx = e.clientX; my = e.clientY; }, { passive: true });
+      window.addEventListener("mouseout", (e) => { if (!e.relatedTarget) { mx = my = -9999; } });
+    }
 
     function draw(t) {
       ctx.clearRect(0, 0, w, h);
 
-      // node-to-node links
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const a = nodes[i], b = nodes[j];
           const dx = a.x - b.x, dy = a.y - b.y;
           const d = Math.hypot(dx, dy);
           if (d < LINK) {
-            ctx.strokeStyle = "rgba(52,168,102," + ((1 - d / LINK) * 0.16) + ")";
+            ctx.strokeStyle = "rgba(52,168,102," + ((1 - d / LINK) * 0.15) + ")";
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
           }
         }
       }
 
+      if (mx > -9999) {
+        const g = ctx.createRadialGradient(mx, my, 0, mx, my, MOUSE_R);
+        g.addColorStop(0, "rgba(52,168,102,0.05)");
+        g.addColorStop(1, "rgba(52,168,102,0)");
+        ctx.fillStyle = g; ctx.fillRect(mx - MOUSE_R, my - MOUSE_R, MOUSE_R * 2, MOUSE_R * 2);
+      }
+
       nodes.forEach((n) => {
-        // gentle pull toward the cursor when near, then drift
         const ddx = mx - n.x, ddy = my - n.y;
         const dm = Math.hypot(ddx, ddy);
+        let near = false;
         if (dm < MOUSE_R) {
-          n.vx += (ddx / dm) * 0.012;
-          n.vy += (ddy / dm) * 0.012;
-          // bright link to the cursor
-          ctx.strokeStyle = "rgba(76,208,136," + ((1 - dm / MOUSE_R) * 0.5) + ")";
+          near = true;
+          n.vx += (ddx / dm) * 0.014;
+          n.vy += (ddy / dm) * 0.014;
+          ctx.strokeStyle = "rgba(76,208,136," + ((1 - dm / MOUSE_R) * 0.55) + ")";
           ctx.lineWidth = 1;
           ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(mx, my); ctx.stroke();
         }
-        // damping + speed cap so it stays calm
         n.vx *= 0.99; n.vy *= 0.99;
         const sp = Math.hypot(n.vx, n.vy);
-        if (sp > 0.6) { n.vx = (n.vx / sp) * 0.6; n.vy = (n.vy / sp) * 0.6; }
+        if (sp > 0.7) { n.vx = (n.vx / sp) * 0.7; n.vy = (n.vy / sp) * 0.7; }
 
         n.x += n.vx; n.y += n.vy;
         if (n.x < 0 || n.x > w) n.vx *= -1;
@@ -374,13 +378,13 @@
           const ang = Math.atan2(n.vy, n.vx);
           ctx.save();
           ctx.translate(n.x, n.y); ctx.rotate(ang);
-          ctx.strokeStyle = "rgba(76,208,136,0.6)"; ctx.lineWidth = 1.2;
+          ctx.strokeStyle = near ? "rgba(76,208,136,0.85)" : "rgba(76,208,136,0.55)"; ctx.lineWidth = 1.2;
           ctx.beginPath(); ctx.moveTo(-4, -3); ctx.lineTo(0, 0); ctx.lineTo(-4, 3); ctx.stroke();
           ctx.restore();
         } else {
-          const tw = 0.4 + 0.35 * Math.sin(t * 0.001 + n.ph); // subtle twinkle
-          ctx.fillStyle = "rgba(52,168,102," + tw + ")";
-          ctx.beginPath(); ctx.arc(n.x, n.y, 1.5, 0, Math.PI * 2); ctx.fill();
+          const tw = 0.38 + 0.34 * Math.sin(t * 0.001 + n.ph);
+          ctx.fillStyle = "rgba(52,168,102," + (near ? Math.min(0.9, tw + 0.4) : tw) + ")";
+          ctx.beginPath(); ctx.arc(n.x, n.y, near ? 2.1 : 1.5, 0, Math.PI * 2); ctx.fill();
         }
       });
 
@@ -393,6 +397,47 @@
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) cancelAnimationFrame(raf);
       else raf = requestAnimationFrame(draw);
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     7. SCROLL PROGRESS BAR
+     ------------------------------------------------------------------ */
+  const scrollbar = document.querySelector("[data-scrollbar]");
+  if (scrollbar) {
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      scrollbar.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + "%";
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    onScroll();
+  }
+
+  /* ------------------------------------------------------------------
+     8. MAGNETIC BUTTONS + 3D CARD TILT (fine pointers only)
+     ------------------------------------------------------------------ */
+  if (finePointer && !reduceMotion) {
+    document.querySelectorAll(".btn").forEach((btn) => {
+      btn.addEventListener("mousemove", (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = e.clientX - r.left - r.width / 2;
+        const y = e.clientY - r.top - r.height / 2;
+        btn.style.transform = "translate(" + x * 0.3 + "px," + y * 0.45 + "px)";
+      });
+      btn.addEventListener("mouseleave", () => { btn.style.transform = ""; });
+    });
+
+    document.querySelectorAll(".member, .case").forEach((card) => {
+      card.addEventListener("mousemove", (e) => {
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform =
+          "perspective(800px) rotateX(" + (-py * 5).toFixed(2) + "deg) rotateY(" +
+          (px * 5).toFixed(2) + "deg) translateY(-5px)";
+      });
+      card.addEventListener("mouseleave", () => { card.style.transform = ""; });
     });
   }
 
